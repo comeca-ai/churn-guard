@@ -42,9 +42,11 @@
     --risk-extreme: 0 84% 60%;
     --risk-extreme-foreground: 0 0% 100%;
 
-    /* Success/Destructive */
+    /* Success/Warning/Destructive */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 10%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
@@ -102,6 +104,8 @@
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 10%;
 
     --border: 220 20% 22%;
     --input: 220 20% 22%;
