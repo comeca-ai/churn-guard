@@ -1,4 +1,5 @@
 import { Bell, Search, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,12 +20,28 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { mockCurrentUser, mockOrganizations } from "@/data/mockData";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   sidebarCollapsed?: boolean;
 }
 
 export function Header({ sidebarCollapsed }: HeaderProps) {
+  const { signOut, profile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  const displayName = profile?.full_name || mockCurrentUser.name;
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2);
+
   return (
     <header
       className={cn(
@@ -69,15 +86,11 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                  {mockCurrentUser.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)}
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-medium">{mockCurrentUser.name}</span>
+                <span className="text-sm font-medium">{displayName}</span>
                 <span className="text-xs text-muted-foreground">
                   {mockOrganizations[0].name}
                 </span>
@@ -91,7 +104,12 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
             <DropdownMenuItem>Configurações</DropdownMenuItem>
             <DropdownMenuItem>Trocar Organização</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Sair</DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-destructive cursor-pointer"
+              onClick={handleSignOut}
+            >
+              Sair
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
