@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { mockCurrentUser } from "@/data/mockData";
 import { UserRole } from "@/types/churn";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -84,6 +85,21 @@ export function Sidebar({ collapsed: controlledCollapsed, onToggle }: SidebarPro
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const collapsed = controlledCollapsed ?? internalCollapsed;
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, profile } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  const displayName = profile?.full_name || mockCurrentUser.name;
+  const displayEmail = profile?.email || mockCurrentUser.email;
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2);
 
   const handleToggle = () => {
     if (onToggle) {
@@ -195,20 +211,16 @@ export function Sidebar({ collapsed: controlledCollapsed, onToggle }: SidebarPro
         >
           <Avatar className="h-9 w-9 flex-shrink-0">
             <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
-              {mockCurrentUser.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)}
+              {initials}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 overflow-hidden">
               <p className="truncate text-sm font-medium text-sidebar-foreground">
-                {mockCurrentUser.name}
+                {displayName}
               </p>
               <p className="truncate text-xs text-sidebar-foreground/60">
-                {mockCurrentUser.email}
+                {displayEmail}
               </p>
             </div>
           )}
@@ -217,6 +229,8 @@ export function Sidebar({ collapsed: controlledCollapsed, onToggle }: SidebarPro
               variant="ghost"
               size="icon"
               className="h-8 w-8 flex-shrink-0 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              onClick={handleSignOut}
+              title="Sair"
             >
               <LogOut className="h-4 w-4" />
             </Button>
