@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { TrendingDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -68,9 +69,12 @@ export function LandingHeader({ onOpenContact }: LandingHeaderProps) {
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
             <Button onClick={() => onOpenContact("demo")}>
               Agendar demo
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/auth">Criar conta e acessar</Link>
             </Button>
           </div>
 
@@ -100,9 +104,14 @@ export function LandingHeader({ onOpenContact }: LandingHeaderProps) {
                   {link.label}
                 </button>
               ))}
-              <Button onClick={() => onOpenContact("demo")} className="mt-2">
-                Agendar demo
-              </Button>
+              <div className="flex flex-col gap-2 mt-2">
+                <Button onClick={() => onOpenContact("demo")}>
+                  Agendar demo
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/auth">Criar conta e acessar</Link>
+                </Button>
+              </div>
             </nav>
           </div>
         )}
