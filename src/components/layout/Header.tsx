@@ -35,12 +35,13 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
     navigate("/auth");
   };
 
-  const displayName = profile?.full_name || mockCurrentUser.name;
+  const displayName = profile?.full_name || "Usuário";
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .slice(0, 2);
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <header

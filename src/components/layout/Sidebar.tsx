@@ -93,13 +93,14 @@ export function Sidebar({ collapsed: controlledCollapsed, onToggle }: SidebarPro
     navigate("/auth");
   };
 
-  const displayName = profile?.full_name || mockCurrentUser.name;
-  const displayEmail = profile?.email || mockCurrentUser.email;
+  const displayName = profile?.full_name || "Usuário";
+  const displayEmail = profile?.email || "";
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .slice(0, 2);
+    .slice(0, 2)
+    .toUpperCase();
 
   const handleToggle = () => {
     if (onToggle) {
