@@ -14,16 +14,498 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      action_plans: {
+        Row: {
+          created_at: string
+          customer_id: string
+          description: string
+          due_date: string | null
+          id: string
+          lost_revenue: number | null
+          notes: string | null
+          owner_id: string | null
+          result: Database["public"]["Enums"]["action_result"] | null
+          retained_revenue: number | null
+          status: Database["public"]["Enums"]["action_status"]
+          type: Database["public"]["Enums"]["action_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          description: string
+          due_date?: string | null
+          id?: string
+          lost_revenue?: number | null
+          notes?: string | null
+          owner_id?: string | null
+          result?: Database["public"]["Enums"]["action_result"] | null
+          retained_revenue?: number | null
+          status?: Database["public"]["Enums"]["action_status"]
+          type: Database["public"]["Enums"]["action_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          lost_revenue?: number | null
+          notes?: string | null
+          owner_id?: string | null
+          result?: Database["public"]["Enums"]["action_result"] | null
+          retained_revenue?: number | null
+          status?: Database["public"]["Enums"]["action_status"]
+          type?: Database["public"]["Enums"]["action_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plans_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alerts: {
+        Row: {
+          channel: Database["public"]["Enums"]["alert_channel"]
+          created_at: string
+          customer_id: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          recipients: string[]
+          scope: string
+          trigger: Database["public"]["Enums"]["alert_trigger"]
+          updated_at: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["alert_channel"]
+          created_at?: string
+          customer_id?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          recipients?: string[]
+          scope?: string
+          trigger: Database["public"]["Enums"]["alert_trigger"]
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["alert_channel"]
+          created_at?: string
+          customer_id?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          recipients?: string[]
+          scope?: string
+          trigger?: Database["public"]["Enums"]["alert_trigger"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_metrics: {
+        Row: {
+          customer_id: string
+          features_used: number
+          id: string
+          last_login: string | null
+          login_count_30d: number
+          nps: number | null
+          payment_status: string
+          recorded_at: string
+          tickets_open: number
+          total_features: number
+        }
+        Insert: {
+          customer_id: string
+          features_used?: number
+          id?: string
+          last_login?: string | null
+          login_count_30d?: number
+          nps?: number | null
+          payment_status?: string
+          recorded_at?: string
+          tickets_open?: number
+          total_features?: number
+        }
+        Update: {
+          customer_id?: string
+          features_used?: number
+          id?: string
+          last_login?: string | null
+          login_count_30d?: number
+          nps?: number | null
+          payment_status?: string
+          recorded_at?: string
+          tickets_open?: number
+          total_features?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_metrics_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          created_at: string
+          id: string
+          last_snapshot_at: string | null
+          mrr: number
+          name: string
+          organization_id: string
+          owner_id: string | null
+          risk_score: number
+          risk_variation: number
+          risk_zone: Database["public"]["Enums"]["risk_zone"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_snapshot_at?: string | null
+          mrr?: number
+          name: string
+          organization_id: string
+          owner_id?: string | null
+          risk_score?: number
+          risk_variation?: number
+          risk_zone?: Database["public"]["Enums"]["risk_zone"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_snapshot_at?: string | null
+          mrr?: number
+          name?: string
+          organization_id?: string
+          owner_id?: string | null
+          risk_score?: number
+          risk_variation?: number
+          risk_zone?: Database["public"]["Enums"]["risk_zone"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      execution_logs: {
+        Row: {
+          customers_processed: number
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          organization_id: string
+          run_type: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          customers_processed?: number
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          organization_id: string
+          run_type: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          customers_processed?: number
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          organization_id?: string
+          run_type?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "execution_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          organization_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          organization_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          organization_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_drivers: {
+        Row: {
+          category: string
+          created_at: string
+          customer_id: string
+          direction: string
+          id: string
+          impact: string | null
+          name: string
+          previous_value: number
+          value: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          customer_id: string
+          direction: string
+          id?: string
+          impact?: string | null
+          name: string
+          previous_value: number
+          value: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_id?: string
+          direction?: string
+          id?: string
+          impact?: string | null
+          name?: string
+          previous_value?: number
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_drivers_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_scores: {
+        Row: {
+          created_at: string
+          customer_id: string
+          drivers_snapshot: Json | null
+          horizon: string
+          id: string
+          score: number
+          zone: Database["public"]["Enums"]["risk_zone"]
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          drivers_snapshot?: Json | null
+          horizon?: string
+          id?: string
+          score: number
+          zone: Database["public"]["Enums"]["risk_zone"]
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          drivers_snapshot?: Json | null
+          horizon?: string
+          id?: string
+          score?: number
+          zone?: Database["public"]["Enums"]["risk_zone"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_scores_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      variables_book: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          organization_id: string
+          source: string | null
+          transform: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          organization_id: string
+          source?: string | null
+          transform?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          organization_id?: string
+          source?: string | null
+          transform?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variables_book_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_organization_id: { Args: never; Returns: string }
+      has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      action_result: "success" | "failure"
+      action_status: "open" | "in_progress" | "completed"
+      action_type: "meeting" | "training" | "technical" | "discount" | "other"
+      alert_channel: "email" | "slack" | "webhook"
+      alert_trigger: "to_high" | "to_extreme" | "any_increase"
+      app_role: "admin" | "cs" | "leadership"
+      risk_zone: "low" | "moderate" | "high" | "extreme"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +632,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      action_result: ["success", "failure"],
+      action_status: ["open", "in_progress", "completed"],
+      action_type: ["meeting", "training", "technical", "discount", "other"],
+      alert_channel: ["email", "slack", "webhook"],
+      alert_trigger: ["to_high", "to_extreme", "any_increase"],
+      app_role: ["admin", "cs", "leadership"],
+      risk_zone: ["low", "moderate", "high", "extreme"],
+    },
   },
 } as const
