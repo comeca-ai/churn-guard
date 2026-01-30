@@ -32,6 +32,7 @@ export default function CustomerDetail() {
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {/* Header with Breadcrumb */}
       <CustomerHeader
         name={customer.name}
         riskLevel={customer.riskLevel}
@@ -42,15 +43,17 @@ export default function CustomerDetail() {
         onNewAction={handleNewAction}
       />
 
+      {/* Timeline Chart - Full Width */}
+      <RiskTimelineChart data={mockRiskScoreHistory} />
+
+      {/* Drivers and Metrics - 2 Columns */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <RiskTimelineChart data={mockRiskScoreHistory} />
         <DriversCard drivers={mockDrivers} />
+        <MetricsCard metrics={mockCustomerMetrics} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <MetricsCard metrics={mockCustomerMetrics} />
-        <ActionsCard actions={customerActions} onNewAction={handleNewAction} />
-      </div>
+      {/* Actions - Full Width */}
+      <ActionsCard actions={customerActions} onNewAction={handleNewAction} />
     </div>
   );
 }
