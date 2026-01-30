@@ -27,10 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if Supabase is properly configured
+  // Check if Supabase is properly configured (Cloud uses VITE_SUPABASE_PUBLISHABLE_KEY)
   const isConfigured = Boolean(
     import.meta.env.VITE_SUPABASE_URL && 
-    import.meta.env.VITE_SUPABASE_ANON_KEY
+    (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY)
   );
 
   // Fetch user profile and roles
