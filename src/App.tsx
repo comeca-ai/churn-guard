@@ -13,6 +13,7 @@ import ActionPlans from "./pages/ActionPlans";
 import Assistant from "./pages/Assistant";
 import Alerts from "./pages/Alerts";
 import NotFound from "./pages/NotFound";
+import { AdminUsers, AdminVariables, AdminLogs } from "./pages/admin";
 
 const queryClient = new QueryClient();
 
@@ -55,9 +56,9 @@ const App = () => (
               <Route path="/assistant" element={<Assistant />} />
               
               {/* Admin routes - require admin role */}
-              <Route path="/admin/users" element={<AdminRoute><Dashboard /></AdminRoute>} />
-              <Route path="/admin/variables" element={<AdminRoute><Dashboard /></AdminRoute>} />
-              <Route path="/admin/logs" element={<AdminRoute><Dashboard /></AdminRoute>} />
+              <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+              <Route path="/admin/variables" element={<AdminRoute><AdminVariables /></AdminRoute>} />
+              <Route path="/admin/logs" element={<AdminRoute><AdminLogs /></AdminRoute>} />
             </Route>
             
             {/* Redirects */}
