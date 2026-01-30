@@ -12,6 +12,24 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Protected layout wrapper component
+function ProtectedAppLayout() {
+  return (
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  );
+}
+
+// Admin protected component wrapper
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute requiredRoles={['admin']}>
+      {children}
+    </ProtectedRoute>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -24,11 +42,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             
             {/* App routes with layout - protected */}
-            <Route element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }>
+            <Route element={<ProtectedAppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/customers" element={<Dashboard />} />
               <Route path="/customers/:id" element={<Dashboard />} />
@@ -37,21 +51,9 @@ const App = () => (
               <Route path="/assistant" element={<Dashboard />} />
               
               {/* Admin routes - require admin role */}
-              <Route path="/admin/users" element={
-                <ProtectedRoute requiredRoles={['admin']}>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/variables" element={
-                <ProtectedRoute requiredRoles={['admin']}>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/logs" element={
-                <ProtectedRoute requiredRoles={['admin']}>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
+              <Route path="/admin/users" element={<AdminRoute><Dashboard /></AdminRoute>} />
+              <Route path="/admin/variables" element={<AdminRoute><Dashboard /></AdminRoute>} />
+              <Route path="/admin/logs" element={<AdminRoute><Dashboard /></AdminRoute>} />
             </Route>
             
             {/* Redirects */}
