@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth";
 import { AppLayout } from "@/components/layout";
+import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CustomerDetail from "./pages/CustomerDetail";
@@ -43,7 +44,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Auth routes */}
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             
             {/* App routes with layout - protected */}
@@ -60,9 +62,6 @@ const App = () => (
               <Route path="/admin/variables" element={<AdminRoute><AdminVariables /></AdminRoute>} />
               <Route path="/admin/logs" element={<AdminRoute><AdminLogs /></AdminRoute>} />
             </Route>
-            
-            {/* Redirects */}
-            <Route path="/" element={<Navigate to="/auth" replace />} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
