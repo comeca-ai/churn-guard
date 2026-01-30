@@ -32,6 +32,8 @@ export interface RiskBadgeProps
     VariantProps<typeof riskBadgeVariants> {
   level: RiskLevel;
   showLabel?: boolean;
+  showScore?: boolean;
+  score?: number;
 }
 
 export function RiskBadge({
@@ -39,11 +41,16 @@ export function RiskBadge({
   level,
   size,
   showLabel = true,
+  showScore = false,
+  score,
   ...props
 }: RiskBadgeProps) {
   return (
     <div className={cn(riskBadgeVariants({ level, size }), className)} {...props}>
       {showLabel ? getRiskLevelLabel(level) : null}
+      {showScore && score !== undefined && (
+        <span className="ml-1 font-bold">({score})</span>
+      )}
     </div>
   );
 }

@@ -8,6 +8,10 @@ import { ProtectedRoute } from "@/components/auth";
 import { AppLayout } from "@/components/layout";
 import AuthPage from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import CustomerDetail from "./pages/CustomerDetail";
+import ActionPlans from "./pages/ActionPlans";
+import Assistant from "./pages/Assistant";
+import Alerts from "./pages/Alerts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,10 +49,10 @@ const App = () => (
             <Route element={<ProtectedAppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/customers" element={<Dashboard />} />
-              <Route path="/customers/:id" element={<Dashboard />} />
-              <Route path="/actions" element={<Dashboard />} />
-              <Route path="/alerts" element={<Dashboard />} />
-              <Route path="/assistant" element={<Dashboard />} />
+              <Route path="/customers/:id" element={<CustomerDetail />} />
+              <Route path="/actions" element={<ActionPlans />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/assistant" element={<Assistant />} />
               
               {/* Admin routes - require admin role */}
               <Route path="/admin/users" element={<AdminRoute><Dashboard /></AdminRoute>} />
