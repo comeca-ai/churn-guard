@@ -1,8 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Plus, ClipboardList } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Plus, ClipboardList, ArrowRight } from "lucide-react";
 import { Action } from "@/types/churn";
 import { cn } from "@/lib/utils";
 
@@ -11,10 +20,7 @@ interface ActionsCardProps {
   onNewAction?: () => void;
 }
 
-const statusConfig: Record<
-  string,
-  { label: string; className: string }
-> = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   open: {
     label: "Aberta",
     className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
@@ -39,79 +45,107 @@ const typeConfig: Record<string, string> = {
 
 export function ActionsCard({ actions, onNewAction }: ActionsCardProps) {
   const pendingActions = actions.filter((a) => a.status !== "completed");
+  const openCount = pendingActions.length;
 
   return (
-    <Card className="animate-fade-in">
+    <Card className="animate-fade-in lg:col-span-2">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-semibold">
-          Ações em Andamento
-        </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onNewAction}>
+        <div>
+          <CardTitle className="text-base font-semibold">
+            Ações em Andamento
+          </CardTitle>
+          <CardDescription>
+            {openCount} {openCount === 1 ? "ação aberta" : "ações abertas"} para este cliente
+          </CardDescription>
+        </div>
+        <Button size="sm" onClick={onNewAction}>
           <Plus className="mr-1 h-4 w-4" />
-          Nova
+          Nova Ação
         </Button>
       </CardHeader>
       <CardContent>
         {pendingActions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <ClipboardList className="h-10 w-10 text-muted-foreground/50" />
-            <p className="mt-2 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-4">
+              <ClipboardList className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
               Nenhuma ação em andamento
             </p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={onNewAction}>
+            <Button variant="outline" size="sm" onClick={onNewAction}>
               <Plus className="mr-1 h-4 w-4" />
               Criar primeira ação
             </Button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {pendingActions.map((action) => {
-              const status = statusConfig[action.status];
-              const ownerInitials = action.ownerName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase();
+          <>
+            <div className="rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-[100px]">Tipo</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead className="w-[140px]">Responsável</TableHead>
+                    <TableHead className="w-[100px]">Prazo</TableHead>
+                    <TableHead className="w-[120px]">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingActions.map((action) => {
+                    const status = statusConfig[action.status];
+                    const ownerInitials = action.ownerName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase();
 
-              return (
-                <div
-                  key={action.id}
-                  className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="text-xs">
-                        {typeConfig[action.type] || action.type}
-                      </Badge>
-                      <Badge className={cn("text-xs", status.className)}>
-                        {status.label}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-foreground line-clamp-2">
-                      {action.description}
-                    </p>
-                    <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Avatar className="h-4 w-4">
-                          <AvatarFallback className="text-[8px] bg-primary/10 text-primary">
-                            {ownerInitials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{action.ownerName}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>
-                          {new Date(action.dueDate).toLocaleDateString("pt-BR")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    return (
+                      <TableRow key={action.id} className="hover:bg-muted/30">
+                        <TableCell>
+                          <Badge variant="outline" className="font-normal">
+                            {typeConfig[action.type] || action.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {action.description}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                                {ownerInitials}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm">{action.ownerName}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {new Date(action.dueDate).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn("font-normal", status.className)}>
+                            {status.label}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/actions" className="text-primary">
+                  Ver todas as ações
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
