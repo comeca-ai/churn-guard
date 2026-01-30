@@ -6,6 +6,13 @@ import type { Database } from '@/types/database';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+// Debug: log config status (remove after debugging)
+console.log('[Supabase Config]', {
+  hasUrl: Boolean(SUPABASE_URL),
+  hasKey: Boolean(SUPABASE_ANON_KEY),
+  urlPrefix: SUPABASE_URL ? SUPABASE_URL.substring(0, 30) + '...' : 'empty',
+});
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('Supabase credentials not configured. Please connect Supabase or set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
 }
