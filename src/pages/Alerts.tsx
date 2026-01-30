@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -72,11 +80,21 @@ const mockAlerts: Alert[] = [
     frequency: "daily",
     isActive: true,
   },
+  {
+    id: "alert-3",
+    name: "Resumo Semanal",
+    trigger: "any_increase",
+    scope: "all",
+    channel: "email",
+    recipients: ["gerente@techcorp.com", "diretor@techcorp.com", "ceo@techcorp.com"],
+    frequency: "weekly",
+    isActive: false,
+  },
 ];
 
 export default function Alerts() {
   const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form state
   const [name, setName] = useState("");
@@ -100,7 +118,7 @@ export default function Alerts() {
   };
 
   const handleAddRecipient = () => {
-    if (newRecipient && !recipients.includes(newRecipient)) {
+    if (newRecipient && newRecipient.includes("@") && !recipients.includes(newRecipient)) {
       setRecipients([...recipients, newRecipient]);
       setNewRecipient("");
     }
@@ -108,6 +126,13 @@ export default function Alerts() {
 
   const handleRemoveRecipient = (email: string) => {
     setRecipients(recipients.filter((r) => r !== email));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddRecipient();
+    }
   };
 
   const handleSave = () => {
@@ -134,8 +159,10 @@ export default function Alerts() {
     setRecipients([]);
     setNewRecipient("");
     setFrequency("immediate");
-    setIsCreating(false);
+    setIsModalOpen(false);
   };
+
+  const isFormValid = name && trigger && recipients.length > 0;
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -146,12 +173,10 @@ export default function Alerts() {
             Configure notificações para mudanças de risco
           </p>
         </div>
-        {!isCreating && (
-          <Button onClick={() => setIsCreating(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Alerta
-          </Button>
-        )}
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Novo Alerta
+        </Button>
       </div>
 
       {/* Existing Alerts */}
@@ -165,7 +190,7 @@ export default function Alerts() {
             <Card
               key={alert.id}
               className={cn(
-                "transition-opacity",
+                "transition-all duration-200",
                 !alert.isActive && "opacity-60"
               )}
             >
@@ -232,12 +257,11 @@ export default function Alerts() {
                 <div className="mt-4 pt-4 border-t flex justify-end">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
+                    size="icon"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => handleDelete(alert.id)}
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Excluir
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
@@ -246,73 +270,88 @@ export default function Alerts() {
         })}
       </div>
 
-      {/* Create Alert Form */}
-      {isCreating && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Criar Novo Alerta</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome do Alerta</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ex: Alerta Risco Extremo"
-                />
-              </div>
+      {/* Empty State */}
+      {alerts.length === 0 && (
+        <Card className="py-12">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+              <Bell className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold">Nenhum alerta configurado</h3>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md">
+              Configure alertas para ser notificado quando clientes mudarem de
+              zona de risco.
+            </p>
+            <Button className="mt-4" onClick={() => setIsModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Criar primeiro alerta
+            </Button>
+          </div>
+        </Card>
+      )}
 
-              <div className="space-y-2">
-                <Label htmlFor="trigger">Gatilho</Label>
-                <Select value={trigger} onValueChange={setTrigger}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o gatilho" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="to_high">Mudou para Alto</SelectItem>
-                    <SelectItem value="to_extreme">
-                      Mudou para Extremo
-                    </SelectItem>
-                    <SelectItem value="any_increase">
-                      Qualquer aumento
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Create Alert Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Novo Alerta</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="alert-name">Nome do Alerta</Label>
+              <Input
+                id="alert-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Alerta Risco Extremo"
+              />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="scope">Escopo</Label>
-                <Select value={scope} onValueChange={setScope}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o escopo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os clientes</SelectItem>
-                    <SelectItem value="specific">Cliente específico</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="trigger">Trigger</Label>
+              <Select value={trigger} onValueChange={setTrigger}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o gatilho" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="to_high">Mudou para Alto</SelectItem>
+                  <SelectItem value="to_extreme">Mudou para Extremo</SelectItem>
+                  <SelectItem value="any_increase">Qualquer aumento de risco</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Escopo</Label>
+              <RadioGroup value={scope} onValueChange={setScope} className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="scope-all" />
+                  <Label htmlFor="scope-all" className="font-normal cursor-pointer">
+                    Todos os clientes
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="specific" id="scope-specific" />
+                  <Label htmlFor="scope-specific" className="font-normal cursor-pointer">
+                    Cliente específico
+                  </Label>
+                </div>
+              </RadioGroup>
 
               {scope === "specific" && (
-                <div className="space-y-2">
-                  <Label htmlFor="customer">Cliente</Label>
-                  <Select value={customerId} onValueChange={setCustomerId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockCustomers.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Select value={customerId} onValueChange={setCustomerId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockCustomers.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
 
@@ -334,8 +373,8 @@ export default function Alerts() {
                   type="email"
                   value={newRecipient}
                   onChange={(e) => setNewRecipient(e.target.value)}
+                  onKeyDown={handleKeyPress}
                   placeholder="email@exemplo.com"
-                  onKeyPress={(e) => e.key === "Enter" && handleAddRecipient()}
                 />
                 <Button variant="outline" onClick={handleAddRecipient}>
                   Adicionar
@@ -375,40 +414,18 @@ export default function Alerts() {
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={resetForm}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={!name || !trigger || recipients.length === 0}
-              >
-                Salvar Alerta
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {alerts.length === 0 && !isCreating && (
-        <Card className="py-12">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-              <Bell className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold">Nenhum alerta configurado</h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-md">
-              Configure alertas para ser notificado quando clientes mudarem de
-              zona de risco.
-            </p>
-            <Button className="mt-4" onClick={() => setIsCreating(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar primeiro alerta
-            </Button>
           </div>
-        </Card>
-      )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={!isFormValid}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
