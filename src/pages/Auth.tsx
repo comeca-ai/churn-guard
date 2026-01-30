@@ -1,41 +1,93 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
+  const [error, setError] = useState<string | null>(null);
+  
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const { signIn, signUp, resetPassword, user, isLoading: authLoading, isConfigured } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !authLoading) {
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [user, authLoading, navigate, location]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
-    // Simulate login - will be replaced with real auth
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    if (email && password) {
+    // If Supabase not configured, simulate login
+    if (!isConfigured) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       toast({
         title: "Login realizado com sucesso!",
         description: "Redirecionando para o dashboard...",
       });
       navigate("/dashboard");
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      setError(getErrorMessage(error.message));
     } else {
       toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: "Email ou senha inválidos",
+        title: "Login realizado com sucesso!",
+        description: "Redirecionando para o dashboard...",
       });
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    if (!isConfigured) {
+      toast({
+        variant: "destructive",
+        title: "Configuração necessária",
+        description: "Conecte o Supabase para habilitar o cadastro.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await signUp(email, password, fullName);
+
+    if (error) {
+      setError(getErrorMessage(error.message));
+    } else {
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Verifique seu email para confirmar a conta.",
+      });
+      setMode('login');
     }
 
     setIsLoading(false);
@@ -43,18 +95,81 @@ export default function AuthPage() {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    if (!isConfigured) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      toast({
+        title: "Email enviado!",
+        description: "Verifique sua caixa de entrada para redefinir a senha.",
+      });
+      setMode('login');
+      setIsLoading(false);
+      return;
+    }
 
-    toast({
-      title: "Email enviado!",
-      description: "Verifique sua caixa de entrada para redefinir a senha.",
-    });
+    const { error } = await resetPassword(email);
 
-    setIsForgotPassword(false);
+    if (error) {
+      setError(getErrorMessage(error.message));
+    } else {
+      toast({
+        title: "Email enviado!",
+        description: "Verifique sua caixa de entrada para redefinir a senha.",
+      });
+      setMode('login');
+    }
+
     setIsLoading(false);
   };
+
+  const getErrorMessage = (message: string): string => {
+    const errorMap: Record<string, string> = {
+      'Invalid login credentials': 'Email ou senha inválidos',
+      'Email not confirmed': 'Email não confirmado. Verifique sua caixa de entrada.',
+      'User already registered': 'Este email já está cadastrado',
+      'Password should be at least 6 characters': 'A senha deve ter pelo menos 6 caracteres',
+      'Unable to validate email address: invalid format': 'Formato de email inválido',
+    };
+    return errorMap[message] || message;
+  };
+
+  const getFormConfig = () => {
+    switch (mode) {
+      case 'signup':
+        return {
+          title: 'Criar Conta',
+          description: 'Preencha os dados para criar sua conta',
+          submitText: 'Criar Conta',
+          onSubmit: handleSignUp,
+        };
+      case 'forgot':
+        return {
+          title: 'Recuperar Senha',
+          description: 'Digite seu email para receber o link de recuperação',
+          submitText: 'Enviar Link',
+          onSubmit: handleForgotPassword,
+        };
+      default:
+        return {
+          title: 'Bem-vindo de volta',
+          description: 'Entre com suas credenciais para acessar a plataforma',
+          submitText: 'Entrar',
+          onSubmit: handleLogin,
+        };
+    }
+  };
+
+  const formConfig = getFormConfig();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -79,19 +194,44 @@ export default function AuthPage() {
           <span className="text-3xl font-bold">ChurnAI</span>
         </div>
 
+        {/* Configuration warning */}
+        {!isConfigured && (
+          <Alert className="mb-4 border-warning/50 bg-warning/10">
+            <AlertCircle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-warning">
+              Supabase não configurado. Usando modo de demonstração.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Card className="border-0 shadow-xl bg-card/95 backdrop-blur">
           <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl">
-              {isForgotPassword ? "Recuperar Senha" : "Bem-vindo de volta"}
-            </CardTitle>
-            <CardDescription>
-              {isForgotPassword
-                ? "Digite seu email para receber o link de recuperação"
-                : "Entre com suas credenciais para acessar a plataforma"}
-            </CardDescription>
+            <CardTitle className="text-2xl">{formConfig.title}</CardTitle>
+            <CardDescription>{formConfig.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={isForgotPassword ? handleForgotPassword : handleLogin} className="space-y-4">
+            <form onSubmit={formConfig.onSubmit} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {mode === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Nome Completo</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Seu nome"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="h-11"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -105,7 +245,7 @@ export default function AuthPage() {
                 />
               </div>
 
-              {!isForgotPassword && (
+              {mode !== 'forgot' && (
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
                   <div className="relative">
@@ -116,6 +256,7 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      minLength={6}
                       className="h-11 pr-10"
                     />
                     <Button
@@ -138,25 +279,63 @@ export default function AuthPage() {
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isForgotPassword ? (
-                  "Enviar Link"
                 ) : (
                   <>
-                    Entrar
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {formConfig.submitText}
+                    {mode === 'login' && <ArrowRight className="ml-2 h-4 w-4" />}
                   </>
                 )}
               </Button>
 
-              <div className="text-center">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="text-sm text-muted-foreground hover:text-primary"
-                  onClick={() => setIsForgotPassword(!isForgotPassword)}
-                >
-                  {isForgotPassword ? "Voltar para o login" : "Esqueci minha senha"}
-                </Button>
+              <div className="text-center space-y-2">
+                {mode === 'login' && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-muted-foreground hover:text-primary"
+                      onClick={() => { setMode('forgot'); setError(null); }}
+                    >
+                      Esqueci minha senha
+                    </Button>
+                    <div className="text-sm text-muted-foreground">
+                      Não tem conta?{' '}
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="p-0 text-primary"
+                        onClick={() => { setMode('signup'); setError(null); }}
+                      >
+                        Cadastre-se
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {mode === 'signup' && (
+                  <div className="text-sm text-muted-foreground">
+                    Já tem conta?{' '}
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 text-primary"
+                      onClick={() => { setMode('login'); setError(null); }}
+                    >
+                      Faça login
+                    </Button>
+                  </div>
+                )}
+
+                {mode === 'forgot' && (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-muted-foreground hover:text-primary"
+                    onClick={() => { setMode('login'); setError(null); }}
+                  >
+                    Voltar para o login
+                  </Button>
+                )}
               </div>
             </form>
           </CardContent>
