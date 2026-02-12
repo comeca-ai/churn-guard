@@ -59,6 +59,11 @@ const mainNavItems: NavItem[] = [
     href: "/assistant",
     icon: Bot,
   },
+  {
+    label: "Importar Dados",
+    href: "/import",
+    icon: Upload,
+  },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -78,12 +83,6 @@ const adminNavItems: NavItem[] = [
     label: "Logs",
     href: "/admin/logs",
     icon: Shield,
-    roles: ["admin"],
-  },
-  {
-    label: "Importar Dados",
-    href: "/admin/import",
-    icon: Upload,
     roles: ["admin"],
   },
 ];
