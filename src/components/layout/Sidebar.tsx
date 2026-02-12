@@ -11,6 +11,7 @@ import {
   Bot,
   ClipboardList,
   Shield,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -77,6 +78,12 @@ const adminNavItems: NavItem[] = [
     label: "Logs",
     href: "/admin/logs",
     icon: Shield,
+    roles: ["admin"],
+  },
+  {
+    label: "Importar Dados",
+    href: "/admin/import",
+    icon: Upload,
     roles: ["admin"],
   },
 ];
