@@ -14,7 +14,7 @@ import ActionPlans from "./pages/ActionPlans";
 import Assistant from "./pages/Assistant";
 import Alerts from "./pages/Alerts";
 import NotFound from "./pages/NotFound";
-import { AdminUsers, AdminVariables, AdminLogs } from "./pages/admin";
+import { AdminUsers, AdminVariables, AdminLogs, AdminDataImport } from "./pages/admin";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +61,7 @@ const App = () => (
               <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
               <Route path="/admin/variables" element={<AdminRoute><AdminVariables /></AdminRoute>} />
               <Route path="/admin/logs" element={<AdminRoute><AdminLogs /></AdminRoute>} />
+              <Route path="/admin/import" element={<AdminRoute><AdminDataImport /></AdminRoute>} />
             </Route>
             
             {/* 404 */}
